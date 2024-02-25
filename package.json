@@ -9,12 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@vercel/kv": "^1.0.1",
-    "ai": "^2.2.36",
     "axios": "^1.6.7",
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.6",
     "geist": "^1.2.2",
+    "nanoid": "^5.0.6",
     "next": "14.1.0",
     "openai": "^4.28.0",
     "react": "^18",

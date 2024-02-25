@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import { PiSparkleFill } from 'react-icons/pi';
 
+
 export default function Avatar() {
   const [text, setText] = useState('');
   /*   const [isSupported, setIsSupported] = useState(true); */
