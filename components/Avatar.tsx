@@ -1,18 +1,21 @@
 'use client';
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { BiMicrophone } from 'react-icons/bi';
+import { BiMicrophone, BiMicrophoneOff } from 'react-icons/bi';
 import AvatarImage from '@/public/Avatar.png';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
-import axios from 'axios';
 import clsx from 'clsx';
 import { PiSparkleFill } from 'react-icons/pi';
 
 export default function Avatar() {
   const [text, setText] = useState('');
-  const [isSupported, setIsSupported] = useState(true);
+  /*   const [isSupported, setIsSupported] = useState(true); */
   const [isListening, setIsListening] = useState(false);
+
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
+    null
+  );
 
   const [AIResponse, setAIResponse] = useState('');
 
@@ -67,42 +70,22 @@ export default function Avatar() {
     if (width === '220px') {
       charactersPerLineAdjusted = 13;
     } else if (width === '350px') {
-      charactersPerLineAdjusted = 18;
+      charactersPerLineAdjusted = 23;
     } else {
-      charactersPerLineAdjusted = 20.5;
+      charactersPerLineAdjusted = 28;
     }
 
     const totalLines = Math.ceil(totalCharacters / charactersPerLineAdjusted);
-    const pxHeight = totalLines * lineHeight + fontSize;
+    const pxHeight = totalLines * (lineHeight * 1.138) + fontSize;
     setResponseHeight(pxHeight);
 
-    console.log(pxHeight);
+    console.log(totalLines)
   }, [AIResponse, width]);
 
-  const endpoint =
-    'https://www.stack-inference.com/run_deployed_flow?flow_id=65da3b5d624145427a5468f1&org=c2e72dba-3092-4209-9615-8c7c9ea2c882';
-  const apiKey = '0989f55b-3812-4674-bab6-bdd3be99a780';
-
-  useEffect(() => {
-    if (!('webkitSpeechRecognition' in window)) {
-      setIsSupported(false);
-    }
-  }, []);
-
   const handleSpeech = async (newtext: string) => {
-    const headers = {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    };
-
-    const data = {
-      'in-0': newtext,
-    };
+    setIsLoading(true);
 
     try {
-      setIsLoading(true);
-      /*       const response = await axios.post(endpoint, data, { headers });
-      const fullApiResponse = response.data['out-0']; */
 
       if (newtext) {
         const fullApiResponse = await fetch('/api/openai', {
@@ -110,10 +93,11 @@ export default function Avatar() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ prompt: newtext }),
         });
-        const responseData = await fullApiResponse.json();
 
+        const responseData = await fullApiResponse.json();
         setAIResponse(responseData.response);
 
+        // audio
         const audioResponse = await fetch('/api/elevenlabs', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -132,13 +116,89 @@ export default function Avatar() {
     }
   };
 
+  let chunks: BlobPart[] = [];
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          const newMediaRecorder = new MediaRecorder(stream);
+          newMediaRecorder.onstart = () => {
+            chunks = [];
+          };
+          newMediaRecorder.ondataavailable = (e) => {
+            chunks.push(e.data);
+          };
+          newMediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+            /*             const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.onerror = function (err) {
+              console.error('Error playing audio:', err);
+            };
+            audio.play(); */
+            try {
+              setIsListening(true);
+              const reader = new FileReader();
+              reader.readAsDataURL(audioBlob);
+              reader.onloadend = async function () {
+                const base64Audio = (reader.result as string).split(',')[1];
+                const response = await fetch('/api/whisper', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ audio: base64Audio }),
+                });
+                const data = await response.json();
+                if (response.status !== 200) {
+                  throw (
+                    data.error ||
+                    new Error(`Request failed with status ${response.status}`)
+                  );
+                }
+                setText(data.result);
+                handleSpeech(data.result);
+              };
+            } catch (error: any) {
+              console.error(error);
+              alert(error.message);
+            } finally {
+              setIsListening(false);
+            }
+          };
+          setMediaRecorder(newMediaRecorder);
+        })
+        .catch((err) => console.error('Error accessing microphone:', err));
+    }
+  }, []);
+
+  const startRecording = () => {
+    if (mediaRecorder) {
+      setAIResponse('');
+      setIsLoading(false);
+      setIsListening(true);
+
+      mediaRecorder.start();
+    }
+  };
+  // Function to stop recording
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      setAIResponse('');
+      setIsLoading(true);
+      setIsListening(false);
+      mediaRecorder.stop();
+    }
+  };
+
   const startListening = () => {
     try {
       setAIResponse('');
       setIsLoading(false);
       setIsListening(false);
 
-      if (!('webkitSpeechRecognition' in window) || !isSupported) {
+      if (!('webkitSpeechRecognition' in window) /*  || !isSupported */) {
         return;
       }
 
@@ -147,7 +207,7 @@ export default function Avatar() {
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
         setText(transcript);
-        handleSpeech(transcript)
+        handleSpeech(transcript);
       };
       recognition.start();
 
@@ -188,11 +248,11 @@ export default function Avatar() {
             className="object-cover"
           />
         </div>
-        {!isSupported && (
+        {/*         {!isSupported && (
           <div className="absolute top-5 px-16 text-center">
             <p>Speech recognition is not supported in your browser.</p>
           </div>
-        )}
+        )} */}
         <div className="mt-[50svh]">
           <>
             <AnimatePresence>
@@ -221,7 +281,7 @@ export default function Avatar() {
                     <h1
                       className={clsx(
                         'text-xl font-medium absolute inset-0',
-                        !AIResponse ? '-top-3.5' : 'top-8'
+                        !AIResponse ? '-top-3.5' : 'top-4'
                       )}
                     >
                       {AIResponse
@@ -236,23 +296,30 @@ export default function Avatar() {
             </AnimatePresence>
             <audio
               ref={audioRef}
-              controls
+              autoPlay
               src={`${audio}`}
               className="w-full"
             />
-
             <div className="flex flex-col items-center gap-4 mt-4">
               <button
                 className={clsx(
                   'w-24 h-24 bg-white/80 hover:bg-white transition active:scale-90 duration-300 backdrop-blur-lg text-main p-4 rounded-full',
-                  (!isSupported || isListening) &&
+                  /* !isSupported ||  */ isLoading &&
                     'cursor-not-allowed opacity-50'
                 )}
-                onClick={startListening}
-                disabled={!isSupported || isListening || isLoading}
+                onClick={
+                  /* startListening */ isListening
+                    ? stopRecording
+                    : startRecording
+                }
+                disabled={/* !isSupported ||  */ /* isListening || */ isLoading}
               >
                 {!isLoading ? (
-                  <BiMicrophone size={64} />
+                  !isListening ? (
+                    <BiMicrophone size={64} />
+                  ) : (
+                    <BiMicrophoneOff size={64} />
+                  )
                 ) : (
                   <PiSparkleFill size={64} className="animate-thinking" />
                 )}
