@@ -6,7 +6,8 @@ import TubitakLogo from '@/public/TÜBİTAK_logo.svg'
 import Avatar from '@/components/Avatar';
 import Link from 'next/link';
 
-export default function Home() {
+export default async function Home() {
+
   return (
     <div id="home" className="w-full p-3 h-screen overflow-hidden">
       <div className="bg-main/40 relative backdrop-blur-xl text-primary-foreground flex gap-4 justify-center items-center rounded-[2rem] w-full h-full">
