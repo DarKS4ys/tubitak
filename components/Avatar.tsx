@@ -131,7 +131,7 @@ export default function Avatar() {
             chunks.push(e.data);
           };
           newMediaRecorder.onstop = async () => {
-            const audioBlob = new Blob(chunks, { type: 'audio/webm' });
+            const audioBlob = new Blob(chunks, { type: 'audio/mpeg' });
             /*             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
             audio.onerror = function (err) {
