@@ -30,7 +30,7 @@ const config: Config = {
             rotate: '40deg',
           },
           '80%': {
-            rotate: '90%',
+            rotate: '90deg',
           },
         },
         blob2: {
@@ -45,13 +45,36 @@ const config: Config = {
             transform: 'translate(-210px, 190px) scale(1.8)',
           },
           '80%': {
-            rotate: '-90%',
+            rotate: '-90deg',
           },
         },
+        thinking: {
+          '0%': {
+            transform:'scale(1)',
+            rotate: '0deg'
+          },
+          '35%': {
+            transform:'scale(1.3)',
+            rotate: '35deg'
+          },
+          '65%': {
+            transform:'scale(1)',
+            rotate: '-15deg'
+          },
+          '80%': {
+            transform:'scale(1.3)',
+            rotate: '35deg'
+          },
+          '100%': {
+            transform:'scale(1)',
+            rotate: '0deg'
+          },
+        }
       },
       animation: {
         blob: 'blob 10s infinite ease-in-out',
         blob2: 'blob 12s infinite ease-out',
+        thinking: 'thinking 2s infinite ease-in-out',
         'blob-reverse': 'blob 8s infinite ease-out reverse',
       },
     },

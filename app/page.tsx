@@ -27,7 +27,7 @@ export default function Home() {
             <Typewriter/>
           </Link>
          </div>
-        <div className="w-[35%] overflow-hidden rounded-[2rem] h-full hidden lg:flex items-end relative justify-end">
+        <div className="w-full md:w-[65%] 2xl:w-[45%] overflow-hidden rounded-br-[2rem] h-full hidden lg:flex items-end relative justify-end">
           <div
             className="absolute right-0 top-0 w-full h-full drop-shadow-lg shadow-black"
             style={{
