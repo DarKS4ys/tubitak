@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest, res: NextResponse) {
     const body = await request.json();
     let { textInput } = body;
-    let voice_id = 'pNInz6obpgDQGcFmaJgB';
+    let voice_id = 'Th8LQHbIXmksfr3mTo9v';
+
+    // q6w6KZK7mGEZ1Rx02UzL
+    // I6zCmbDokuE7EmkTMaKU
   
     const url = `https://api.elevenlabs.io/v1/text-to-speech/${voice_id}`;
     const headers: Record<string, string> = {
@@ -41,6 +44,7 @@ export async function POST(request: NextRequest, res: NextResponse) {
       const buffer = Buffer.from(arrayBuffer);
       return new Response(buffer);
     } catch (error: any) {
+      console.log(error)
       return new Response(JSON.stringify({ error: error.message }));
     }
   }
