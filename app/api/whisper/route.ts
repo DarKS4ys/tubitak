@@ -1,14 +1,9 @@
 // Import necessary libraries
-import { useEdgeStore } from '@/lib/storage';
 import { backendClient } from '@/lib/storage-server';
-import { exec } from 'child_process';
-import fs from 'fs';
+/* import { exec } from 'child_process'; */
 import { NextRequest, NextResponse } from 'next/server';
-import os from 'os';
-import { Readable } from 'stream';
 
-const util = require('util');
-const execAsync = util.promisify(exec);
+/* const execAsync = util.promisify(exec); */
 const OpenAI = require('openai');
 const openai = new OpenAI(process.env.OPENAI_API_KEY);
 export async function POST(request: NextRequest) {
@@ -39,7 +34,7 @@ export async function POST(request: NextRequest) {
 }
 /*  console.log(os.tmpdir()) */
 
-async function convertAudioToMp3(audioData: any) {
+/* async function convertAudioToMp3(audioData: any) {
   try {
     // Write the audio data to a file
     const webmFile = await backendClient.publicFiles.upload({
@@ -60,7 +55,7 @@ async function convertAudioToMp3(audioData: any) {
     });
 
     // Convert the audio to MP3 using ffmpeg
-    const outputPath = `tmp/output.mp3`;
+    const outputPath = `${os.tmpdir()}/output.mp3`;
     await execAsync(`ffmpeg -i ${webmFile.url} ${outputPath}`);
     // Read the converted audio data
 
@@ -73,11 +68,11 @@ async function convertAudioToMp3(audioData: any) {
     console.log(error);
   }
 }
-
+ */
 async function convertAudioToText(audioData: any) {
   
   try {
-    const mp3AudioData = await convertAudioToMp3(audioData);
+    const mp3AudioData = audioData
 
     if (!mp3AudioData) {
       throw new Error('Failed to convert audio to MP3.');
