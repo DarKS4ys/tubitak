@@ -2,7 +2,7 @@
 import { exec } from 'child_process';
 import fs from 'fs';
 import { NextRequest, NextResponse } from 'next/server';
-/* import os from 'os'; */
+import os from 'os';
 
 const util = require('util');
 const execAsync = util.promisify(exec);
@@ -42,7 +42,7 @@ async function convertAudioToText(audioData: any) {
       throw new Error('Failed to convert audio to MP3.');
     }
 
-    const outputPath = `tmp/output.mp3`;
+    const outputPath = `${os.tmpdir()}/output.mp3`;
     fs.writeFileSync(outputPath, mp3AudioData);
     
     const response = await openai.audio.transcriptions.create({
@@ -65,17 +65,24 @@ async function convertAudioToText(audioData: any) {
 async function convertAudioToMp3(audioData: any) {
   try {
     // Write the audio data to a file
-    const inputPath = `tmp/input.webm`;
-    fs.writeFileSync(inputPath, audioData);
+    /* const inputPath = `${os.tmpdir()}/input.webm`;
+    fs.writeFileSync(inputPath, audioData); */
+
+    let writeStream = fs.createWriteStream(`/tmp/input.webm`, audioData);
+    writeStream.on('finish', async function () {
+      const outputPath = `/tmp/output.mp3`;
+      await execAsync(`ffmpeg -i /tmp/input.webm /tmp/output.mp3`);
+
+    })
   
-    // Convert the audio to MP3 using ffmpeg
-    const outputPath = `tmp/output.mp3`;
-    await execAsync(`ffmpeg -i ${inputPath} ${outputPath}`);
+    const outputPath = `/tmp/output.mp3`;
+/*     await execAsync(`ffmpeg -i ${inputPath} ${outputPath}`);
+ */
     // Read the converted audio data
 
     const mp3AudioData = fs.readFileSync(outputPath);
     // Delete the temporary files
-    fs.unlinkSync(inputPath);
+    fs.unlinkSync('/tmp/input.webm');
     fs.unlinkSync(outputPath);
 
     return mp3AudioData;
