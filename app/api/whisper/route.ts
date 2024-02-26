@@ -138,7 +138,6 @@ async function createFileFromBlob(blob: Blob, fileName: string) {
   const tempDir = path.join(process.cwd(), 'temp');
 
   // Ensure the temp directory exists
-  await fsPromises.mkdir(tempDir, { recursive: true });
 
   const filePath = path.join(tempDir, fileName);
   fs.writeFileSync(filePath, fileContent);
