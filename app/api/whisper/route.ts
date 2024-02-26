@@ -96,8 +96,7 @@ async function convertAudioToText(audioData: any) {
       input: {
         type: 'post',
       },
-    });
-
+    })
     const mp3FileUrl = res.url;
     const fetchedResponse = await fetch(mp3FileUrl);
     const mp3Buffer = await fetchedResponse.arrayBuffer();
@@ -124,3 +123,20 @@ async function convertAudioToText(audioData: any) {
     console.error(err);
   }
 }
+
+/*
+async function createFileFromBlob(blob: Blob, fileName: string) {
+  // Convert Blob to ArrayBuffer
+  const arrayBuffer = await blob.arrayBuffer();
+  // Simulate creating a file from blob
+  const fileContent = Buffer.from(arrayBuffer);
+
+  const tempDir = path.join(process.cwd(), 'temp');
+
+  // Ensure the temp directory exists
+  await fsPromises.mkdir(tempDir, { recursive: true });
+
+  const filePath = path.join(tempDir, fileName);
+  fs.writeFileSync(filePath, fileContent);
+  return filePath;
+}*/
