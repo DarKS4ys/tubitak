@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
     // Read the converted audio data
 
     const mp3AudioData = fs.readFileSync(outputPath);
-    
+
     fs.unlinkSync(outputPath);
 
     return mp3AudioData;
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
 }
  */
 async function convertAudioToText(audioData: any) {
-  
+
   try {
     const mp3AudioData = audioData
 
@@ -102,14 +102,11 @@ async function convertAudioToText(audioData: any) {
     const fetchedResponse = await fetch(mp3FileUrl);
     const mp3Buffer = await fetchedResponse.arrayBuffer();
     const blob = new Blob([mp3Buffer], { type: 'audio/mpeg' });
-/*
-    const file = new File([blob], 'audio.mp3', { type: 'audio/mpeg' });
-*/
 
-    const file = createFileFromBlob(blob, 'audio.mp3');
+    const file = new File([blob], 'audio.mp3', { type: 'audio/mpeg' });
 
     console.log(file)
-    
+
 /*     const outputPath = `${os.tmpdir()}/output.mp3`;
     fs.writeFileSync(outputPath, mp3AudioData); */
 
@@ -118,7 +115,7 @@ async function convertAudioToText(audioData: any) {
       model: 'whisper-1',
       language: 'tr',
     });
-/* 
+/*
     fs.unlinkSync(outputPath); */
     const transcribedText = response.text;
 
@@ -126,15 +123,4 @@ async function convertAudioToText(audioData: any) {
   } catch (err) {
     console.error(err);
   }
-}
-
-
-async function createFileFromBlob(blob: Blob, fileName: string) {
-  // Convert Blob to ArrayBuffer
-  const arrayBuffer = await blob.arrayBuffer();
-  // Simulate creating a file from blob
-  const fileContent = Buffer.from(arrayBuffer);
-  const filePath = path.join(process.cwd(), 'temp', fileName);
-  fs.writeFileSync(filePath, fileContent);
-  return filePath;
 }
