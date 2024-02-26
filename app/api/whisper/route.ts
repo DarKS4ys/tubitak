@@ -96,13 +96,18 @@ async function convertAudioToText(audioData: any) {
       input: {
         type: 'post',
       },
-    })
+    });
+
     const mp3FileUrl = res.url;
     const fetchedResponse = await fetch(mp3FileUrl);
     const mp3Buffer = await fetchedResponse.arrayBuffer();
     const blob = new Blob([mp3Buffer], { type: 'audio/mpeg' });
 
     const file = new File([blob], 'audio.mp3', { type: 'audio/mpeg' });
+/*
+    const file = createFileFromBlob(blob, 'audio.mp3');
+*/
+    /*TEST WITH RAILWAY*/
 
     console.log(file)
 
@@ -124,7 +129,6 @@ async function convertAudioToText(audioData: any) {
   }
 }
 
-/*
 async function createFileFromBlob(blob: Blob, fileName: string) {
   // Convert Blob to ArrayBuffer
   const arrayBuffer = await blob.arrayBuffer();
@@ -139,4 +143,4 @@ async function createFileFromBlob(blob: Blob, fileName: string) {
   const filePath = path.join(tempDir, fileName);
   fs.writeFileSync(filePath, fileContent);
   return filePath;
-}*/
+}
