@@ -132,6 +132,8 @@ export default function Avatar() {
           };
           newMediaRecorder.onstop = async () => {
             const audioBlob = new Blob(chunks, { type: 'audio/mpeg' });
+            /* const file = new File([audioBlob], 'audio.mp3', { type: 'audio/mpeg' }); */
+
             /*             const audioUrl = URL.createObjectURL(audioBlob);
             const audio = new Audio(audioUrl);
             audio.onerror = function (err) {
