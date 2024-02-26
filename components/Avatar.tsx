@@ -8,9 +8,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import { PiSparkleFill } from 'react-icons/pi';
 
+
 export default function Avatar() {
   const [text, setText] = useState('');
-  const [isSupported, setIsSupported] = useState(true);
+  /*   const [isSupported, setIsSupported] = useState(true); */
   const [isListening, setIsListening] = useState(false);
 
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(
@@ -35,12 +36,6 @@ export default function Avatar() {
     medium: 768,
     large: 1600,
   };
-
-  useEffect(() => {
-    if (!('webkitSpeechRecognition' in window)) {
-      setIsSupported(false);
-    }
-  }, []);
 
   useEffect(() => {
     if (audio && audioRef.current) {
@@ -85,13 +80,14 @@ export default function Avatar() {
     const pxHeight = totalLines * (lineHeight * 1.138) + fontSize;
     setResponseHeight(pxHeight);
 
-    console.log(totalLines);
+    console.log(totalLines)
   }, [AIResponse, width]);
 
   const handleSpeech = async (newtext: string) => {
     setIsLoading(true);
 
     try {
+
       if (newtext) {
         const fullApiResponse = await fetch('/api/openai', {
           method: 'POST',
@@ -121,6 +117,64 @@ export default function Avatar() {
     }
   };
 
+  let chunks: BlobPart[] = [];
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          const newMediaRecorder = new MediaRecorder(stream);
+          newMediaRecorder.onstart = () => {
+            chunks = [];
+          };
+          newMediaRecorder.ondataavailable = (e) => {
+            chunks.push(e.data);
+          };
+          newMediaRecorder.onstop = async () => {
+            const audioBlob = new Blob(chunks, { type: 'audio/mpeg' });
+            /* const file = new File([audioBlob], 'audio.mp3', { type: 'audio/mpeg' }); */
+
+            /*             const audioUrl = URL.createObjectURL(audioBlob);
+            const audio = new Audio(audioUrl);
+            audio.onerror = function (err) {
+              console.error('Error playing audio:', err);
+            };
+            audio.play(); */
+            try {
+              setIsListening(true);
+              const reader = new FileReader();
+              reader.readAsDataURL(audioBlob);
+              reader.onloadend = async function () {
+                const base64Audio = (reader.result as string).split(',')[1];
+                const response = await fetch('/api/whisper', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ audio: base64Audio }),
+                });
+                const data = await response.json();
+                if (response.status !== 200) {
+                  throw (
+                    data.error ||
+                    new Error(`Request failed with status ${response.status}`)
+                  );
+                }
+                setText(data.result);
+                handleSpeech(data.result);
+              };
+            } catch (error: any) {
+              console.error(error);
+              alert(error.message);
+            } finally {
+              setIsListening(false);
+            }
+          };
+          setMediaRecorder(newMediaRecorder);
+        })
+        .catch((err) => console.error('Error accessing microphone:', err));
+    }
+  }, []);
 
   const startRecording = () => {
     if (mediaRecorder) {
@@ -147,7 +201,7 @@ export default function Avatar() {
       setIsLoading(false);
       setIsListening(false);
 
-      if (!('webkitSpeechRecognition' in window) || !isSupported ) {
+      if (!('webkitSpeechRecognition' in window) /*  || !isSupported */) {
         return;
       }
 
@@ -155,11 +209,11 @@ export default function Avatar() {
       recognition.lang = 'tr-TR';
       recognition.onresult = (event: any) => {
         const transcript = event.results[0][0].transcript;
-        handleSpeech(transcript)
         setText(transcript);
+        handleSpeech(transcript);
       };
       recognition.start();
-  
+
       recognition.onstart = () => {
         setIsListening(true);
       };
@@ -197,11 +251,11 @@ export default function Avatar() {
             className="object-cover"
           />
         </div>
-        {!isSupported && (
+        {/*         {!isSupported && (
           <div className="absolute top-5 px-16 text-center">
             <p>Speech recognition is not supported in your browser.</p>
           </div>
-        )}
+        )} */}
         <div className="mt-[50svh]">
           <>
             <AnimatePresence>
@@ -253,11 +307,15 @@ export default function Avatar() {
               <button
                 className={clsx(
                   'w-24 h-24 bg-white/80 hover:bg-white transition active:scale-90 duration-300 backdrop-blur-lg text-main p-4 rounded-full',
-                  !isSupported &&
+                  /* !isSupported ||  */ isLoading &&
                     'cursor-not-allowed opacity-50'
                 )}
-                onClick={startListening}
-                disabled={!isSupported || isListening}
+                onClick={
+                  /* startListening */ isListening
+                    ? stopRecording
+                    : startRecording
+                }
+                disabled={/* !isSupported ||  */ /* isListening || */ isLoading}
               >
                 {!isLoading ? (
                   !isListening ? (
