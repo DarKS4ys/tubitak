@@ -3,6 +3,8 @@ import { backendClient } from '@/lib/storage-server';
 /* import { exec } from 'child_process'; */
 import { NextRequest, NextResponse } from 'next/server';
 import {blobToFile} from "@/lib/utils";
+import path from "node:path";
+import * as fs from "fs";
 
 /* const execAsync = util.promisify(exec); */
 const OpenAI = require('openai');
@@ -104,7 +106,7 @@ async function convertAudioToText(audioData: any) {
     const file = new File([blob], 'audio.mp3', { type: 'audio/mpeg' });
 */
 
-    const file = blobToFile(blob, 'audio.mp3');
+    const file = createFileFromBlob(blob, 'audio.mp3');
 
     console.log(file)
     
@@ -124,4 +126,15 @@ async function convertAudioToText(audioData: any) {
   } catch (err) {
     console.error(err);
   }
+}
+
+
+async function createFileFromBlob(blob: Blob, fileName: string) {
+  // Convert Blob to ArrayBuffer
+  const arrayBuffer = await blob.arrayBuffer();
+  // Simulate creating a file from blob
+  const fileContent = Buffer.from(arrayBuffer);
+  const filePath = path.join(process.cwd(), 'temp', fileName);
+  fs.writeFileSync(filePath, fileContent);
+  return filePath;
 }
