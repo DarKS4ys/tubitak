@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(request: NextRequest, res: NextResponse) {
     const body = await request.json();
     let { textInput } = body;
-    let voice_id = 'Th8LQHbIXmksfr3mTo9v';
+    let voice_id = 'UgDlNKm5a9LnJWpOiPWm';
 
     // q6w6KZK7mGEZ1Rx02UzL
     // I6zCmbDokuE7EmkTMaKU
