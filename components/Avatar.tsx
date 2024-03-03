@@ -251,7 +251,7 @@ export default function Avatar() {
             className="object-cover"
           />
         </div>
-        {/*         {!isSupported && (
+        {/*{!isSupported && (
           <div className="absolute top-5 px-16 text-center">
             <p>Speech recognition is not supported in your browser.</p>
           </div>
