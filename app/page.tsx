@@ -40,7 +40,7 @@ export default async function Home() {
         </div>
 
         <div className='absolute top-10 left-10'>
-          <Image alt='Tübitak logo' src={TubitakLogo} className='drop-shadow-xl'></Image>
+          <Image alt='Tübitak logo' src={TubitakLogo} className='drop-shadow-xl w-3/4'></Image>
         </div>
       </div>
       <div className="inset-0 w-full p-3 absolute -z-10 ">
